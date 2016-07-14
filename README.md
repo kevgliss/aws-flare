@@ -92,7 +92,7 @@ data returned from AWS APIs.
             "PrefixListIds": [],
             "FromPort": 80,
             "IpRanges": [{
-                "CidrIp": "0.0.0.0/0"
+                "CidrIp": "54.23.123.33/32"
             }],
             "ToPort": 80,
             "IpProtocol": "tcp",

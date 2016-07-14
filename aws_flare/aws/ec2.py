@@ -19,21 +19,22 @@ class IpPermissionSchema(FlareSchema):
     @validates_schema
     def rules(self, data):
         if (data['to_port'] - data['from_port']) > 1000:
-            raise ValidationError('Think about reducing the number of available ports.')
+            raise ValidationError('Think about reducing the number of available ports.', ['from_port', 'to_port'])
 
-    @validates('ip_ranges')
+    @validates_schema
     def external_ip(self, data):
-        for cidr in data:
+        for cidr in data['ip_ranges']:
             if not is_private(cidr['cidr_ip']):
+                print
                 for network in self.context.get('network_whitelist', []):
                     if in_network(cidr['cidr_ip'], network):
                         break
                 else:
                     raise ValidationError('Security group contains public range: {range}.'.format(
                         range=cidr['cidr_ip']
-                    ))
+                    ), ['ip_ranges'])
             if cidr['cidr_ip'] == '0.0.0.0/0':
-                raise ValidationError('Security group allows all ranges via 0.0.0.0/0.')
+                raise ValidationError('Security group allows all ranges via 0.0.0.0/0.', ['ip_ranges'])
 
 
 class SecurityGroupSchema(FlareSchema):

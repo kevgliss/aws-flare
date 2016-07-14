@@ -1,4 +1,4 @@
-from marshmallow import fields, validates
+from marshmallow import fields, validates, validates_schema
 from marshmallow.exceptions import ValidationError
 
 from ..core import FlareSchema, DictField, OrField
@@ -7,10 +7,13 @@ from ..core import FlareSchema, DictField, OrField
 class IAMInstanceProfileSchema(FlareSchema):
     instance_profile_name = fields.String()
 
-    @validates('instance_profile_name')
+    @validates_schema
     def app_specific(self, data):
         if data in self.context.get('invalid_instance_profiles', []):
-            raise ValidationError('You are using an invalid IAM profile, consider moving onto an application specific group.')
+            raise ValidationError(
+                'You are using an invalid IAM profile, consider moving onto an application specific group.',
+                ['instance_profile_name']
+            )
 
 
 class IAMRolePolicyStatementSchema(FlareSchema):

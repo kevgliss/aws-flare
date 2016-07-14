@@ -11,29 +11,29 @@ class ListenerSchema(FlareSchema):
     sslcertificate_id = fields.String()
 
     @validates_schema
-    def validate_schmea(self, data):
-        if data.get('certificate_id'):
+    def validate_schema(self, data):
+        if data.get('sslcertificate_id'):
             if data['load_balancer_port'] != 443:
                 raise ValidationError('You are using SSL on the non-standard port: {port}'.format(
                     port=data['load_balancer_port']
-                ))
+                ), ['sslcertificate_id'])
 
 
 class ListenerDescriptionSchema(FlareSchema):
     listener = fields.Nested(ListenerSchema)
     policy_names = fields.List(fields.String)
 
-    @validates('policy_names')
+    @validates_schema
     def validate_policies(self, data):
         for name in data:
             if not name.startswith('ELBSecurityPolicy'):
-                raise ValidationError('Custom listener policies are not recommended.')
+                raise ValidationError('Custom listener policies are not recommended.', ['policy_names'])
             else:
                 if name != self.context.get('standard_cipher_policy'):
                     raise ValidationError('You are using cipher policy {name} instead of the standard {standard}'.format(
                         name=name,
                         standard=self.context.get('standard_cipher_policy')
-                    ))
+                    ), ['policy_names'])
 
 
 class ELBSchema(FlareSchema):
